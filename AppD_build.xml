@@ -7,6 +7,7 @@
     <property name="poi.lib.dir"		value="${basedir}/poiLibs"/>
     <property name="license.main"               value="org.appdynamics.customrp.license.CountLicenses"/>
     <property name="crypto.tool"                value="org.appdynamics.familysearch.util.CryptoTool"/>
+    <property name="releases"                   value="${basedir}/releases"/>
 
     <property name="AppDynamicsLC.basename" value="AppDynamicsLC"/>
     <property name="AppDynamicsLC.version"     value="2.0.0"/>
@@ -75,6 +76,10 @@
         <delete file="${exec.lib.dir}/${AppDynamicsLC.basename}*"/>
         <copy file="${build.dir}/${AppDynamicsLC.basename}_${AppDynamicsLC.version}.jar" 
               tofile="${exec.lib.dir}/${AppDynamicsLC.basename}_${AppDynamicsLC.version}.jar"/>
+	<mkdir dir="${releases}"/>
+        <zip destfile="${releases}/${AppDynamicsLC.basename}_${AppDynamicsLC.version}.zip">
+                <zipfileset dir="${exec.lib.dir}" prefix="execLib" />
+        </zip>
     </target>
     
 </project>
