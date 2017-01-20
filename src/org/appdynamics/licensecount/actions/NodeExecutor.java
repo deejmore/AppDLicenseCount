@@ -69,12 +69,9 @@ public class NodeExecutor implements Runnable{
     @Override 
     public void run(){
         // logger.log(Level.INFO, "Starting executor!");
-        MetricDatas mDatas= 
-                access.getRESTMetricQuery(nodeLic.getQueryType(), appName, nodeLic.getNode().getTierName(), nodeLic.getNode().getName(), 
-                totalTimeRange.getStart(), totalTimeRange.getEnd());
-        //logger.log(Level.INFO, "Executed query!");
-        //What happens when this is null ?
-        //nodeLic.setTotalRangeValue(new NodeLicenseRange("Total Node Count"));
+        MetricDatas mDatas= access.getAgentNodeAppMetricQuery(nodeLic.getQueryType(), appName, nodeLic.getNode().getTierName(), nodeLic.getNode().getName(), 
+                totalTimeRange.getStart(), totalTimeRange.getEnd(), false);
+        
          
         nodeLic.getTotalRangeValue().setStart(totalTimeRange.getStart());
         nodeLic.getTotalRangeValue().setEnd(totalTimeRange.getEnd());
@@ -106,8 +103,9 @@ public class NodeExecutor implements Runnable{
         if(myInterval < 8){
 
             TimeRange t = TimeRangeHelper.getSingleTimeRange(myInterval);
-            //access.getRESTMetricQuery(nodeLic.getQueryType(), appName, nodeLic.getNode().getTierName(), nodeLic.getNode().getName(),            totalTimeRange.getStart(), totalTimeRange.getEnd());
-            MetricDatas mDatas= access.getRESTMetricQuery(nodeLic.getQueryType(), appName, nodeLic.getNode().getTierName(), nodeLic.getNode().getName(), t.getStart(), nodeLic.getTotalRangeValue().getEnd());
+            
+            //MetricDatas mDatas= access.getRESTMetricQuery(nodeLic.getQueryType(), appName, nodeLic.getNode().getTierName(), nodeLic.getNode().getName(), t.getStart(), nodeLic.getTotalRangeValue().getEnd());
+            MetricDatas mDatas= access.getAgentNodeAppMetricQuery(nodeLic.getQueryType(), appName, nodeLic.getNode().getTierName(), nodeLic.getNode().getName(), t.getStart(), nodeLic.getTotalRangeValue().getEnd(), false);
             if(mDatas != null && !mDatas.hasNoValues()) {
                 return mDatas.getMetric_data().get(0).getMetricValues().get(0);
             }

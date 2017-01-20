@@ -149,8 +149,8 @@ public class TierExecutor implements Runnable{
         
         MetricDatas mDatasApp= null;
         while(!success && count < 4){           
-                mDatasApp=
-                        access.getRESTMetricQuery(queryIndex, appName, tierLic.getName(), "*", start, end);
+                mDatasApp=access.getAgentNodeAppMetricQuery(queryIndex, appName, tierLic.getName(), "*", start, end, false);
+                        //access.getRESTMetricQuery(queryIndex, appName, tierLic.getName(), "*", start, end);
                 if(mDatasApp == null){
                         try{
                             Thread.sleep(1000 * count);
@@ -178,7 +178,7 @@ public class TierExecutor implements Runnable{
         MetricDatas val = null;
         if(myInterval < 8){
             TimeRange t = TimeRangeHelper.getSingleTimeRange(myInterval);
-            val= access.getRESTMetricQuery(queryIndex, appName,  tierLic.getName(), "*", t.getStart(), t.getEnd());
+            val= access.getAgentNodeAppMetricQuery(queryIndex, appName, tierLic.getName(), "*",  t.getStart(), t.getEnd(),false);
             if(val != null && !val.hasNoValues()) {
                 return val;
             }
@@ -188,7 +188,7 @@ public class TierExecutor implements Runnable{
              MetricDatas val1;
              // First we are going to grab the first set of metrics
              // logger.log(Level.INFO,new StringBuilder().append("Asking for ").append(t.getStart()).append(" and ").append(t.getEnd()).toString());
-             val= access.getRESTMetricQuery(queryIndex, appName,  tierLic.getName(), "*", t.getStart(), t.getEnd());
+             val= access.getAgentNodeAppMetricQuery(queryIndex, appName, tierLic.getName(), "*",  t.getStart(), t.getEnd(),false);
                 if(val != null && !val.hasNoValues()) {
             
                     val1 = getMetrics(queryIndex,myInterval-5);
