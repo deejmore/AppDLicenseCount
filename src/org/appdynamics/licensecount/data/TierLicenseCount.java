@@ -115,35 +115,10 @@ public class TierLicenseCount extends LicenseCount{
         
         if(s.debugLevel >= 2) 
             logger.log(Level.INFO,new StringBuilder().append("Populating tier ").append(name).append(" license count for application ").append(applicationName).toString());
-        
-        MetricDatas tierAppAgents=access.getRESTMetricQuery(0, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd());
-        MetricDatas tierMachineAgents=access.getRESTMetricQuery(1, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd());
-        
-        //totalRangeValue=new TierLicenseRange("Tier Total Count");
-        //totalRangeValue.setStart(totalTimeRange.getStart());totalRangeValue.setEnd(totalTimeRange.getEnd());
-        
-        /*
-         * This is going to get the nodes to count all of the licenses.
-         * 
-         * This is a good point to thread out
-        
-        Instead of asking on a per node, lets grab the tier level information.
-         
-        ThreadExecutor execNodes = new ThreadExecutor(8);
-        
-        for(NodeLicenseCount nodeL:nodeLicenseCount){
-            //public NodeExecutor(NodeLicenseCount nodeLic,RESTAccess access, 
-            //String appName, TimeRange totalTimeRange, 
-            //ArrayList<TimeRange> timeRanges, String tierAgentType)
-            NodeExecutor nodeExec = new NodeExecutor(nodeL, access, applicationName, totalTimeRange, timeRanges, tierAgentType);
-            execNodes.getExecutor().execute(nodeExec);
-            //nodeL.populateNodeLicenseRange(totalTimeRange, timeRanges, access, applicationName, tierAgentType);
-        }
-        execNodes.getExecutor().shutdown();
-        execNodes.shutdown();
-        */
-
-        
+      
+        MetricDatas tierAppAgents=access.getAgentTierAppMetricQuery(0, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd(),false);
+        MetricDatas tierMachineAgents=access.getAgentTierAppMetricQuery(1, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd(),false);
+ 
         
         // This is going to get the hourly values but we need to be type 0, otherwise it will not work
         if(LicenseS.TYPE_V == 0){
