@@ -58,7 +58,7 @@ public class ApplicationLicenseCount extends LicenseCount{
         // In this scenario we are going to zero out the minutes, seconds, hours of 
         //ArrayList<LicenseRange> listOfTimes=getTimeRange(interval);
         if(nodes == null){ 
-            logger.log(Level.SEVERE,new StringBuilder().append("The node query for application ").append(applicationName).append(" did not return any nodes.").toString());
+            logger.log(Level.SEVERE,"The node query for application {0} did not return any nodes.",applicationName);
             return;
         }
         
@@ -74,7 +74,7 @@ public class ApplicationLicenseCount extends LicenseCount{
         
         Tiers tiers = access.getTiersForApplication(applicationId);
         if(tiers == null){ 
-            logger.log(Level.SEVERE,new StringBuilder().append("The tier query for application ").append(applicationName).append(" did not return any tiers.").toString());
+            logger.log(Level.SEVERE,"The tier query for application {0} did not return any tiers.",applicationName);
             return;
         }
             
@@ -99,7 +99,6 @@ public class ApplicationLicenseCount extends LicenseCount{
             Integer id = tierIt.next();
             if(tierLicenses.get(id).getNodeLicenseCount().isEmpty()){
                 tierLicensesNoNodes.put(id, tierLicenses.get(id).getTier());
-                //tierLicenses.remove(id);
                 tierIt.remove();
             }
         }

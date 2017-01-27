@@ -46,7 +46,7 @@ public class WriteExcelDoc {
     public void init(){
         XSSFWorkbook workbook = new XSSFWorkbook(); 
          
-        //Create a blank sheet
+        /* This will create the sheets.  */
         XSSFSheet licenseSummary = workbook.createSheet(LicenseS.LICENSE_SUMMARY);
         XSSFSheet licenseTiers = workbook.createSheet(LicenseS.TIER_SUMMARY);
         XSSFSheet licenseHourlyTiers = workbook.createSheet(LicenseS.HOURLY_TIER_SUMMARY);

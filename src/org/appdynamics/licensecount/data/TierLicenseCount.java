@@ -116,8 +116,8 @@ public class TierLicenseCount extends LicenseCount{
         if(s.debugLevel >= 2) 
             logger.log(Level.INFO,new StringBuilder().append("Populating tier ").append(name).append(" license count for application ").append(applicationName).toString());
         
-        MetricDatas tierAppAgents=access.getRESTMetricQuery(0, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd());
-        MetricDatas tierMachineAgents=access.getRESTMetricQuery(1, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd());
+        MetricDatas tierAppAgents= access.getAgentTierAppMetricQuery(0, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd(), false);    //access.getRESTMetricQuery(0, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd());
+        MetricDatas tierMachineAgents= access.getAgentTierAppMetricQuery(1, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd(), false); //access.getRESTMetricQuery(1, applicationName, name, totalTimeRange.getStart(), totalTimeRange.getEnd());
         
         //totalRangeValue=new TierLicenseRange("Tier Total Count");
         //totalRangeValue.setStart(totalTimeRange.getStart());totalRangeValue.setEnd(totalTimeRange.getEnd());

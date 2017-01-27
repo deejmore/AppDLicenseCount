@@ -106,6 +106,7 @@ public class CountLicenses {
         RESTAccess access = new RESTAccess(LicenseS.CONTROLLER_V,LicenseS.PORT_V,LicenseS.SSL_V,LicenseS.USERNAME_V,LicenseS.PASSWD_V,LicenseS.ACCOUNT_V);
         
         // This grabs all of the apps.
+        logger.log(Level.INFO,"Getting applications.");
         Applications apps=access.getApplications();
         if(apps == null){
             // If this is null then we had a problem connection so might as well stop.
@@ -116,9 +117,11 @@ public class CountLicenses {
         // Going to create the primary object.
         CustomerLicenseCount customer = new CustomerLicenseCount(LicenseS.ACCOUNT_V);
         
-        logger.log(Level.INFO,"Getting applications.");
         
-
+        
+        /*
+                The user only wants the license for a certain number of Applications.
+        */
         for(Application appD: apps.getApplications()){
             if(!LicenseS.APPS_V.isEmpty()){
                 if(LicenseS.APPS_V.contains(appD.getName())){
@@ -138,7 +141,7 @@ public class CountLicenses {
         
         //If we didn't find anything, then exit
         if(customer.getApplications().isEmpty()){
-            logger.log(Level.WARNING,new StringBuilder().append("No applications were found, exiting").toString());
+            logger.log(Level.WARNING,"No applications were found, exiting.");
             System.exit(0);
         } 
         /* 
@@ -147,16 +150,16 @@ public class CountLicenses {
         */
          
         //We can start to to thread these
-        logger.log(Level.INFO,new StringBuilder().append("Populating the applications for a total of ").append(customer.getApplications().size()).append(" of applications").toString());
+        logger.log(Level.INFO,"Populating the applications for a total of  {0} applications.",customer.getApplications().size());
         customer.populateApplications(access, LicenseS.INTERVAL_V,0);
         //This is were we start to count the licenses.
         customer.countTierLicenses();
         
         WriteExcelDoc excel=new WriteExcelDoc(customer);
         excel.init();
-        long end = Calendar.getInstance().getTimeInMillis();
-        long total = (end - start)/1000;
-        logger.log(Level.INFO,"Total run time is " + total); 
+
+        long total = (Calendar.getInstance().getTimeInMillis() - start)/1000;
+        logger.log(Level.INFO,"Total run time is {0}" , total); 
     }
     
     public static void main(String[] args){

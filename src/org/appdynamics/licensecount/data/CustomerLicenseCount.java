@@ -68,7 +68,7 @@ public class CustomerLicenseCount extends LicenseCount{
         // Let's check to make sure we have the correct REST API version
        
         if(s.debugLevel >= 2) 
-            logger.log(Level.INFO,new StringBuilder().append("Adding application ").append(app.getApplicationName()).toString());
+            logger.log(Level.INFO,"Adding application {0}.");
         applications.put(app.getApplicationId(),app);
         //if(s.debugLevel > 0) System.out.println("\tAdding " + app.getApplicationName() + " id " +app.getApplicationId()+" size " + applications.size());
     }
@@ -80,7 +80,8 @@ public class CustomerLicenseCount extends LicenseCount{
     public void populateApplications(RESTAccess access, int interval, int type){
         
         if(s.debugLevel >= 2) 
-            logger.log(Level.INFO,new StringBuilder().append("Creating time range for interval ").append(interval).toString());
+            logger.log(Level.INFO,"Creating time range for interval {0}",interval);
+        
         // Should we make the total timer range an avg of usage?
         if(type == 0){
             timeRanges=TimeRangeHelper.getDailyTimeRanges(interval);
@@ -97,8 +98,8 @@ public class CustomerLicenseCount extends LicenseCount{
         
         
         for(ApplicationLicenseCount app: applications.values()){
-            logger.log(Level.INFO,new StringBuilder().append("\tPopulating application ").append(app.getApplicationName()).toString());
-            app.populateLicense(access.getNodesForApplication(app.getApplicationId()), access, timeRanges,totalRange);
+            logger.log(Level.INFO,"\tPopulating application {0}.",app.getApplicationName());
+            app.populateLicense(access.getNodesForApplication(app.getApplicationId()), access, timeRanges, totalRange);
         }
         
         

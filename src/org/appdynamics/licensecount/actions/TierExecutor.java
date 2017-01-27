@@ -56,18 +56,29 @@ public class TierExecutor implements Runnable{
     public void run(){
         /*
             We are going to query both for the machine agents and the app agents. The first thing we need to
-        determine if we are doing a daily call or a minute call. If we are doing a minute call we can just execute.
+        determine if we are doing a daily call TYPE_V=1 or a minute call TYPE_V=0. If we are doing a minute call we can just execute.
         if we are doing a daily call, maybe we split it.
         */
         MetricDatas appAgents=null;
         MetricDatas macAgents=null;
+        
+        MetricDatas appTierAgents=null;
+        MetricDatas macTierAgents=null;
+        
+        // -- logger.log(Level.INFO,"\tExecuting the tier executer on type " + LicenseS.TYPE_V);
         if(LicenseS.TYPE_V == 1){
-            appAgents = getMetrics(0,totalTimeRange.getStart(),totalTimeRange.getEnd());
-            macAgents = getMetrics(1,totalTimeRange.getStart(),totalTimeRange.getEnd());
+            appAgents = getMetrics(0,totalTimeRange.getStart(),totalTimeRange.getEnd(),0);
+            macAgents = getMetrics(1,totalTimeRange.getStart(),totalTimeRange.getEnd(),0);
+            
+            appTierAgents = getMetrics(0,totalTimeRange.getStart(),totalTimeRange.getEnd(),1);
+            macTierAgents = getMetrics(1,totalTimeRange.getStart(),totalTimeRange.getEnd(),1);
             
         }else{
-            appAgents = getMetrics(0,LicenseS.INTERVAL_V);
-            macAgents = getMetrics(1,LicenseS.INTERVAL_V);
+            appAgents = getMetrics(0,LicenseS.INTERVAL_V,0);
+            macAgents = getMetrics(1,LicenseS.INTERVAL_V,0);
+            
+            appTierAgents = getMetrics(0,LicenseS.INTERVAL_V,1);
+            macTierAgents = getMetrics(1,LicenseS.INTERVAL_V,1);
         }
         
         /*
@@ -77,12 +88,12 @@ public class TierExecutor implements Runnable{
         if(appAgents != null && macAgents != null){
             pushRanges(appAgents, macAgents);
         }else{
+            logger.log(Level.INFO,"\tIntial queries returned null values ");
             if(appAgents == null){
-                    appAgents = getMetrics(0,totalTimeRange.getStart(),totalTimeRange.getEnd());
-            
+                    appAgents = getMetrics(0,totalTimeRange.getStart(),totalTimeRange.getEnd(),0);
             }
             if(macAgents == null){
-                   macAgents = getMetrics(1,totalTimeRange.getStart(),totalTimeRange.getEnd());
+                   macAgents = getMetrics(1,totalTimeRange.getStart(),totalTimeRange.getEnd(),0);
             }
            
             // This is going to be the last check for anything, if we still don't have a true statement, just give it up.
@@ -92,6 +103,8 @@ public class TierExecutor implements Runnable{
                 logger.log(Level.SEVERE,"We did not get all of the proper metrics for app and machine agents for tier " + tierLic.getName());
             }
         }
+        
+        
     }
     
     public void pushRanges(MetricDatas app, MetricDatas mach){
@@ -99,6 +112,7 @@ public class TierExecutor implements Runnable{
             This is going to get all of the nodes and get the metrics for them.
         */
         for(NodeLicenseCount nlc:tierLic.getNodeLicenseCount()){
+                logger.log(Level.INFO,"Working on node {0}",nlc.getName());
                 nlc.getTotalRangeValue().setStart(totalTimeRange.getStart());
                 nlc.getTotalRangeValue().setEnd(totalTimeRange.getEnd());
 
@@ -106,17 +120,24 @@ public class TierExecutor implements Runnable{
                 //nlc.getTotalRangeValue().setMetricValues(app.getFirstMetricValues()); // This will get the metrics for the app agent
                 //nlc.getTotalRangeValue().setMachineMetricValues(mach.getFirstMetricValues()); // We need to check for nulls
                 nlc.getTotalRangeValue().setMetricValues( getMetricData(app,nlc.getName()).getFirstMetricValues()); // This will get the metrics for the app agent
-                
                 nlc.getTotalRangeValue().setMachineMetricValues(getMetricData(mach,nlc.getName()).getFirstMetricValues() ); // We need to check for nulls
+                
                 for(TimeRange tRange:timeRanges){
                         NodeLicenseRange nodeR = new NodeLicenseRange();
-                        nodeR.setStart(tRange.getStart());nodeR.setEnd(tRange.getEnd());
+                        nodeR.setStart(tRange.getStart());
+                        nodeR.setEnd(tRange.getEnd());
                         nodeR.setName(nodeR.createName());
+                        logger.log(Level.INFO,"Looking at {0}",nodeR);
                         for(MetricValue val: nlc.getTotalRangeValue().getMetricValues().getMetricValue()){
-                            if(nodeR.withIn(val.getStartTimeInMillis())) nodeR.getMetricValues().getMetricValue().add(val);
+                            if(nodeR.withIn(val.getStartTimeInMillis())) {
+                                //logger.log(Level.INFO,"Found -- Looking at {0}",nodeR);
+                                nodeR.getMetricValues().getMetricValue().add(val);
+                            }
                         }
                         for(MetricValue val: nlc.getTotalRangeValue().getMachineMetricValues().getMetricValue()){
-                            if(nodeR.withIn(val.getStartTimeInMillis())) nodeR.getMetricValues().getMetricValue().add(val);
+                            if(nodeR.withIn(val.getStartTimeInMillis())) {
+                                nodeR.getMetricValues().getMetricValue().add(val);
+                            }
                         }
                         nlc.getRangeValues().add(nodeR);
                 }
@@ -143,18 +164,23 @@ public class TierExecutor implements Runnable{
     }
     
     
-    public MetricDatas getMetrics(int queryIndex, long start, long end){
+    public MetricDatas getMetrics(int queryIndex, long start, long end, int type){
         int count=1;
         boolean success=false;
         
-        MetricDatas mDatasApp= null;
-        while(!success && count < 4){           
-                mDatasApp=
-                        access.getRESTMetricQuery(queryIndex, appName, tierLic.getName(), "*", start, end);
-                if(mDatasApp == null){
+        MetricDatas val= null;
+        while(!success && count < 4){       
+            
+                if(type == 0){
+                    val= access.getAgentNodeAppMetricQuery(queryIndex, appName,  tierLic.getName(), "*", start,end, false);
+                }else{
+                    val= access.getAgentTierAppMetricQuery(queryIndex, appName,  tierLic.getName(), start, end, false);
+                }
+                
+                if(val  == null){
                         try{
-                            Thread.sleep(1000 * count);
                             count ++;
+                            Thread.sleep(1000 * count);
                         }catch(Exception e){}
                 }else{
                     count = 5;success=true;
@@ -165,33 +191,44 @@ public class TierExecutor implements Runnable{
         if(!success){
             logger.log(Level.SEVERE, new StringBuilder().append("Unable to get metrics for tier ").append(tierLic.getName()).append(" for the index ").append(queryIndex).append(".").toString());
         }
-        return mDatasApp;
+        return val;
     }
     
 
     
     /*
-        This will do multiple requests for the same node.
+        This will do multiple requests for the same node. The type is either 0 for node and 1 for tier.
     */
-    private MetricDatas getMetrics(int queryIndex, int valT){
-        int myInterval = valT;
+    private MetricDatas getMetrics( int queryIndex, int valT, int type ){
+       
         MetricDatas val = null;
-        if(myInterval < 8){
-            TimeRange t = TimeRangeHelper.getSingleTimeRange(myInterval);
-            val= access.getRESTMetricQuery(queryIndex, appName,  tierLic.getName(), "*", t.getStart(), t.getEnd());
-            if(val != null && !val.hasNoValues()) {
-                return val;
-            }
+        
+        if(valT < 8){
+            TimeRange t = TimeRangeHelper.getSingleTimeRange(valT);
+            logger.log(Level.INFO, "Asking for the last " + t.toString());
+            if(type == 0){
+                val= access.getAgentNodeAppMetricQuery(queryIndex, appName,  tierLic.getName(), "*", t.getStart(), t.getEnd(), false);
+             }else{
+                 val= access.getAgentTierAppMetricQuery(queryIndex, appName,  tierLic.getName(), t.getStart(), t.getEnd(), false);
+             }
+             logger.log(Level.INFO, "*****Asking for the nodes in tier last 8 {0} and got\n",tierLic.getName());
+            
         }else{
             // We are going to start to select the metrics 
-             TimeRange t = TimeRangeHelper.getSingleTimeRange(myInterval,5);
+             TimeRange t = TimeRangeHelper.getSingleTimeRange(valT,5); 
              MetricDatas val1;
              // First we are going to grab the first set of metrics
              // logger.log(Level.INFO,new StringBuilder().append("Asking for ").append(t.getStart()).append(" and ").append(t.getEnd()).toString());
-             val= access.getRESTMetricQuery(queryIndex, appName,  tierLic.getName(), "*", t.getStart(), t.getEnd());
-                if(val != null && !val.hasNoValues()) {
-            
-                    val1 = getMetrics(queryIndex,myInterval-5);
+             logger.log(Level.INFO, "Asking for the last " + t.toString());
+             if(type == 0){
+                val= access.getAgentNodeAppMetricQuery(queryIndex, appName,  tierLic.getName(), "*", t.getStart(), t.getEnd(), false);
+             }else{
+                 val= access.getAgentTierAppMetricQuery(queryIndex, appName,  tierLic.getName(), t.getStart(), t.getEnd(), false);
+             }
+             logger.log(Level.INFO, "*****Asking for the nodes in tier {0} and got\n", tierLic.getName());
+             
+                if(val != null && ! val.hasNoValues()) {
+                    val1 = getMetrics(queryIndex,valT-5, type);
                     if(val != null){
                         val.merge(val1);
                     }
