@@ -41,7 +41,7 @@ public class OPTS {
     public static final boolean VERSION_R=false;
     public static final boolean VERSION_A=false;
     public static final String VERSION_D="Prints out the version of the tool";
-    public static final String VERSION_V="2.0.0";
+    public static final String VERSION_V="2.0.1";
     
     public static final String FILENAME_L="file";
     public static final String FILENAME_S="f";
