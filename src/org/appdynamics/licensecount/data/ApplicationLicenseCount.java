@@ -53,7 +53,7 @@ public class ApplicationLicenseCount extends LicenseCount{
      * This count is going to be a bit more involved, it will require more time because we are going to gather all of the timeranges and 
      * then request the availability for that time.
      */
-    public void populateLicense(Nodes nodes, RESTAccess access, ArrayList<TimeRange> listOfTimes, 
+    public void populateLicense(Nodes nodes, RESTAccess access, ArrayList<TimeRange> dailyTimeRange, 
             TimeRange totalTimeRange){
         // In this scenario we are going to zero out the minutes, seconds, hours of 
         //ArrayList<LicenseRange> listOfTimes=getTimeRange(interval);
@@ -103,6 +103,8 @@ public class ApplicationLicenseCount extends LicenseCount{
             }
         }
         
+        // We are going to create a single hourly
+        ArrayList<TimeRange> hourlyTimeRanges = TimeRangeHelper.getHourlyTimeRanges(totalTimeRange.getStart(), totalTimeRange.getEnd());
         
         
         /*
@@ -115,7 +117,7 @@ public class ApplicationLicenseCount extends LicenseCount{
         for(TierLicenseCount tCount: tierLicenses.values()){
             
             // tCount.populateNodeLicenseRange(totalTimeRange, listOfTimes, access, applicationName);
-            TierExecutor tierExec = new TierExecutor(tCount, access, applicationName, totalTimeRange, listOfTimes);
+            TierExecutor tierExec = new TierExecutor(tCount, access, applicationName, totalTimeRange, dailyTimeRange,hourlyTimeRanges);
             execTiers.getExecutor().execute(tierExec);
         }
         
@@ -147,7 +149,7 @@ public class ApplicationLicenseCount extends LicenseCount{
                     //public NodeExecutor(NodeLicenseCount nodeLic,RESTAccess access, 
                     //String appName, TimeRange totalTimeRange, 
                     //ArrayList<TimeRange> timeRanges, String tierAgentType)
-                    EUMExecuter eumExec = new EUMExecuter(pageL, access, applicationName, totalTimeRange, listOfTimes);
+                    EUMExecuter eumExec = new EUMExecuter(pageL, access, applicationName, totalTimeRange, dailyTimeRange);
                     execNodes.getExecutor().execute(eumExec);
                     //nodeL.populateNodeLicenseRange(totalTimeRange, timeRanges, access, applicationName, tierAgentType);
                 }

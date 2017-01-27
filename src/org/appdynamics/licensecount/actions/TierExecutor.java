@@ -7,6 +7,7 @@ package org.appdynamics.licensecount.actions;
 import org.appdynamics.licensecount.data.TierLicenseCount;
 import org.appdynamics.licensecount.data.NodeLicenseCount;
 import org.appdynamics.licensecount.data.NodeLicenseRange;
+import org.appdynamics.licensecount.data.TierHourLicenseRange;
 import org.appdynamics.licensecount.resources.LicenseS;
 import org.appdynamics.appdrestapi.RESTAccess;
 import org.appdynamics.appdrestapi.data.*;
@@ -33,7 +34,7 @@ public class TierExecutor implements Runnable{
     private TierLicenseCount tierLic;
     private RESTAccess access;
     private TimeRange totalTimeRange;
-    private ArrayList<TimeRange> timeRanges=new ArrayList<TimeRange>();
+    private ArrayList<TimeRange> timeRanges, hourlyTimeRanges;
     private String appName;
     
     /*
@@ -42,13 +43,14 @@ public class TierExecutor implements Runnable{
      */
     public TierExecutor(TierLicenseCount tierLic,RESTAccess access, 
             String appName, TimeRange totalTimeRange, 
-            ArrayList<TimeRange> timeRanges){
+            ArrayList<TimeRange> timeRanges, ArrayList<TimeRange> hourlyTimeRanges){
         
         this.tierLic=tierLic;
         this.access=access;
         this.appName=appName;
         this.timeRanges=timeRanges;
         this.totalTimeRange=totalTimeRange;
+        this.hourlyTimeRanges=hourlyTimeRanges;
         
     }
     
@@ -86,7 +88,7 @@ public class TierExecutor implements Runnable{
         */
         
         if(appAgents != null && macAgents != null){
-            pushRanges(appAgents, macAgents);
+            pushDailyRanges(appAgents, macAgents);
         }else{
             logger.log(Level.INFO,"\tIntial queries returned null values ");
             if(appAgents == null){
@@ -98,7 +100,26 @@ public class TierExecutor implements Runnable{
            
             // This is going to be the last check for anything, if we still don't have a true statement, just give it up.
             if(appAgents != null && macAgents != null){
-                pushRanges(appAgents, macAgents);
+                pushDailyRanges(appAgents, macAgents);
+            }else{
+                logger.log(Level.SEVERE,"We did not get all of the proper metrics for app and machine agents for tier " + tierLic.getName());
+            }
+        }
+        
+        if(appTierAgents != null && macTierAgents != null){
+            pushHourlyRanges(appTierAgents, macTierAgents);
+        }else{
+            logger.log(Level.INFO,"\tIntial queries returned null values ");
+            if(appTierAgents == null){
+                    appTierAgents = getMetrics(0,totalTimeRange.getStart(),totalTimeRange.getEnd(),1);
+            }
+            if(macTierAgents == null){
+                   macTierAgents = getMetrics(1,totalTimeRange.getStart(),totalTimeRange.getEnd(),1);
+            }
+           
+            // This is going to be the last check for anything, if we still don't have a true statement, just give it up.
+            if(appTierAgents != null && macTierAgents != null){
+                pushHourlyRanges(appTierAgents, macTierAgents);
             }else{
                 logger.log(Level.SEVERE,"We did not get all of the proper metrics for app and machine agents for tier " + tierLic.getName());
             }
@@ -107,7 +128,31 @@ public class TierExecutor implements Runnable{
         
     }
     
-    public void pushRanges(MetricDatas app, MetricDatas mach){
+    public void pushHourlyRanges(MetricDatas app, MetricDatas mach){
+        /*
+            This is going to get all of the nodes and get the metrics for them.
+        */
+        
+        for(TimeRange hourRange: hourlyTimeRanges){
+            TierHourLicenseRange tr = new TierHourLicenseRange(hourRange);
+            tr.createName();
+            for(MetricValue mv:tierLic.getMetricValues(app).getMetricValue()){
+                if(tr.withIn(mv.getStartTimeInMillis())) tr.getAppMetricValues().getMetricValue().add(mv);
+            }
+            
+            
+            for(MetricValue mv:tierLic.getMetricValues(mach).getMetricValue()){
+                if(tr.withIn(mv.getStartTimeInMillis())) tr.getMachineMetricValues().getMetricValue().add(mv);
+            }
+            
+            tr.countAgents();
+            tierLic.getTierHourLicenseRange().add(tr);           
+        }
+
+        
+    }
+    
+    public void pushDailyRanges(MetricDatas app, MetricDatas mach){
         /*
             This is going to get all of the nodes and get the metrics for them.
         */
@@ -116,9 +161,6 @@ public class TierExecutor implements Runnable{
                 nlc.getTotalRangeValue().setStart(totalTimeRange.getStart());
                 nlc.getTotalRangeValue().setEnd(totalTimeRange.getEnd());
 
-                // getMetricData(app, nlc.getName()).
-                //nlc.getTotalRangeValue().setMetricValues(app.getFirstMetricValues()); // This will get the metrics for the app agent
-                //nlc.getTotalRangeValue().setMachineMetricValues(mach.getFirstMetricValues()); // We need to check for nulls
                 nlc.getTotalRangeValue().setMetricValues( getMetricData(app,nlc.getName()).getFirstMetricValues()); // This will get the metrics for the app agent
                 nlc.getTotalRangeValue().setMachineMetricValues(getMetricData(mach,nlc.getName()).getFirstMetricValues() ); // We need to check for nulls
                 
