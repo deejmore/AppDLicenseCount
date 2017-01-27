@@ -9,7 +9,7 @@
     <property name="crypto.tool"                value="org.appdynamics.familysearch.util.CryptoTool"/>
 
     <property name="AppDynamicsLC.basename" value="AppDynamicsLC"/>
-    <property name="AppDynamicsLC.version"     value="2.0.0"/>
+    <property name="AppDynamicsLC.version"     value="2.0.1"/>
 
     <loadproperties srcFile="one_time_git.properties"/>    
     

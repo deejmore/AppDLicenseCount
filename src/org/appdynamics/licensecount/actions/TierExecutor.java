@@ -109,7 +109,7 @@ public class TierExecutor implements Runnable{
         if(appTierAgents != null && macTierAgents != null){
             pushHourlyRanges(appTierAgents, macTierAgents);
         }else{
-            logger.log(Level.INFO,"\tIntial queries returned null values ");
+            logger.log(Level.INFO,"\tIntial queries for Tier metrics returned null values, trying again. ");
             if(appTierAgents == null){
                     appTierAgents = getMetrics(0,totalTimeRange.getStart(),totalTimeRange.getEnd(),1);
             }
@@ -157,7 +157,7 @@ public class TierExecutor implements Runnable{
             This is going to get all of the nodes and get the metrics for them.
         */
         for(NodeLicenseCount nlc:tierLic.getNodeLicenseCount()){
-                logger.log(Level.INFO,"Working on node {0}",nlc.getName());
+                //logger.log(Level.INFO,"Working on node {0}",nlc.getName());
                 nlc.getTotalRangeValue().setStart(totalTimeRange.getStart());
                 nlc.getTotalRangeValue().setEnd(totalTimeRange.getEnd());
 
@@ -169,7 +169,7 @@ public class TierExecutor implements Runnable{
                         nodeR.setStart(tRange.getStart());
                         nodeR.setEnd(tRange.getEnd());
                         nodeR.setName(nodeR.createName());
-                        logger.log(Level.INFO,"Looking at {0}",nodeR);
+                       // logger.log(Level.INFO,"Looking at {0}",nodeR);
                         for(MetricValue val: nlc.getTotalRangeValue().getMetricValues().getMetricValue()){
                             if(nodeR.withIn(val.getStartTimeInMillis())) {
                                 //logger.log(Level.INFO,"Found -- Looking at {0}",nodeR);
@@ -247,13 +247,13 @@ public class TierExecutor implements Runnable{
         
         if(valT < 8){
             TimeRange t = TimeRangeHelper.getSingleTimeRange(valT);
-            logger.log(Level.INFO, "Asking for the last " + t.toString());
+            //logger.log(Level.INFO, "Asking for the last " + t.toString());
             if(type == 0){
                 val= access.getAgentNodeAppMetricQuery(queryIndex, appName,  tierLic.getName(), "*", t.getStart(), t.getEnd(), false);
              }else{
                  val= access.getAgentTierAppMetricQuery(queryIndex, appName,  tierLic.getName(), t.getStart(), t.getEnd(), false);
              }
-             logger.log(Level.INFO, "*****Asking for the nodes in tier last 8 {0} and got\n",tierLic.getName());
+             //logger.log(Level.INFO, "*****Asking for the nodes in tier last 8 {0} and got\n",tierLic.getName());
             
         }else{
             // We are going to start to select the metrics 
