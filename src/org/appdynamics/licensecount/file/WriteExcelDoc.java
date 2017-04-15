@@ -201,20 +201,24 @@ public class WriteExcelDoc {
         
         if (limit > 6) {
             increment = limit;
-        } else { increment = 6; }
+        } else { increment = 7; }
         
         for(int i=rowIndex; i < (rowIndex + increment); i++){
             rows.add(curSheet.createRow(i));
         }
         
         Cell cell=null;
+        //logger.log(Level.INFO,"The size of the array is rows " + rows.size() + ", the limit is " + limit );
         
         for(int i=0; i <  7 || j < limit ;i++){
+            //logger.log(Level.INFO,"The value of i is " + i + ", the size of j is " + j);
             if ( j < limit ) {
                 cell = rows.get(i).createCell(1);
                 cell.setCellValue(group.getValue().get(j).getApplicationName());
                 j++;
-            } switch(i){
+            } 
+            
+            switch(i){
             
                 case 0:
                     cell = rows.get(i).createCell(0);

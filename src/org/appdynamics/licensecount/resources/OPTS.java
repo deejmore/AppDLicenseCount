@@ -41,7 +41,7 @@ public class OPTS {
     public static final boolean VERSION_R=false;
     public static final boolean VERSION_A=false;
     public static final String VERSION_D="Prints out the version of the tool";
-    public static final String VERSION_V="2.0.1";
+    public static final String VERSION_V="2.0.2";
     
     public static final String FILENAME_L="file";
     public static final String FILENAME_S="f";
@@ -117,7 +117,7 @@ public class OPTS {
     public static String LOGFILE_V="";
     
     
-    public static final String USAGE="java -jar AppDynamicsLC.jar";
+    public static final String USAGE="java -cp \"execLib/*\" org.appdynamics.licensecount.CountLicenses -c <FQDN-For-Controller> -P <PORT> -u<USER-NAME> -p <PASSWORD> -a <ACCOUNT-NAME> [-s] [-n] [-i] [-A <Apps>] [-d 1|2] [-g<PATH-TO-FILE>]";
     public static final String FILE_ENDING="_LicenseCount.xlsx";
     
     public static final String GROUP_L = "groupfile";

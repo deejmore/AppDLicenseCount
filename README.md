@@ -12,7 +12,7 @@ Requirements:
 -------------------
 The AppDLicenseCount solution is dependent on the AppDRESTAPI-SDK 
                (https://github.com/Appdynamics/AppDRESTAPI-SDK.git) 
-version 2.5.2 or higher is needed for the current version of the license count, this should be 
+version 2.5.4 or higher is needed for the current version of the license count, this should be 
 cloned and built before cloning this package. It is recommended that both packages 
 share a base directory, this will make the dependency checking easier. Compile and 
 package the AppDRESTAPI-SDK to insure files that are needed are present. Once this 
@@ -26,7 +26,7 @@ extra spaces are present):
 
 appd_rest_base=../AppDRESTAPI-SDK
 
-appd_rest_jar=AppDRESTAPI-SDK_2.5.2.jar
+appd_rest_jar=AppDRESTAPI-SDK_2.5.4.jar
 
 Building:
 -----------
@@ -76,8 +76,10 @@ Example:
 
 java -Xmx512m -cp "execLib/*" org.appdynamics.licensecount.CountLicenses -cACME-CONTROLLER.saas.appdynamics.com -P443 -uACMEUSERNAME -pACMEPASSWORD -aACME -s -g/my/path/to/group.txt
 
+If you have a large controller (75+ tiers  or 1000+ nodes or 20+ applications) then you should add the -Xmx options to insure that you have enough memory for the program to successfully run.
+
 Support:
 --------
-For support and feature requests please email gilbert.solorzano@appdynamics.com
+For support please email gilbert.solorzano@appdynamics.com
 
 
